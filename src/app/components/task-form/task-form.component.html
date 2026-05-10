@@ -1,0 +1,123 @@
+<div class="modal-backdrop" (click)="onCancel()"></div>
+
+<div class="modal" role="dialog" aria-modal="true">
+  <header class="modal-header">
+    <h2 class="modal-title">{{ isEdit ? 'Edit Task' : 'New Task' }}</h2>
+    <button class="close-btn" (click)="onCancel()" aria-label="Close">✕</button>
+  </header>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="modal-body">
+
+    <!-- Title -->
+    <div class="field" [ngClass]="{ 'field-error': isFieldInvalid('title') }">
+      <label class="label" for="title">Title <span class="required">*</span></label>
+      <input
+        id="title"
+        class="input"
+        type="text"
+        formControlName="title"
+        placeholder="What needs to be done?"
+        autocomplete="off"
+      />
+      @if (hasError('title', 'required') || hasError('title', 'whitespace')) {
+        <p class="error-msg">Title is required.</p>
+      } @else if (hasError('title', 'minlength')) {
+        <p class="error-msg">Title must be at least 3 characters.</p>
+      } @else if (hasError('title', 'maxlength')) {
+        <p class="error-msg">Title cannot exceed 120 characters.</p>
+      }
+    </div>
+
+    <!-- Description -->
+    <div class="field">
+      <label class="label" for="description">Description</label>
+      <textarea
+        id="description"
+        class="input textarea"
+        formControlName="description"
+        placeholder="Add more context…"
+        rows="3"
+      ></textarea>
+      @if (hasError('description', 'maxlength')) {
+        <p class="error-msg">Description cannot exceed 500 characters.</p>
+      }
+    </div>
+
+    <div class="field-row">
+      <!-- Status -->
+      <div class="field">
+        <label class="label" for="status">Status</label>
+        <select id="status" class="input" formControlName="status">
+          @for (s of statuses; track s) {
+            <option [value]="s">{{ columnLabels[s] }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Priority -->
+      <div class="field">
+        <label class="label" for="priority">Priority</label>
+        <select id="priority" class="input" formControlName="priority">
+          @for (p of priorities; track p) {
+            <option [value]="p">{{ p | titlecase }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <!-- Assignee -->
+      <div class="field">
+        <label class="label" for="assignee">Assignee</label>
+        <select id="assignee" class="input" formControlName="assignee">
+          @for (a of assignees; track a) {
+            <option [value]="a">{{ a }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Project -->
+      <div class="field">
+        <label class="label" for="projectId">Project</label>
+        <select id="projectId" class="input" formControlName="projectId">
+          @for (p of projects; track p.id) {
+            <option [value]="p.id">{{ p.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <!-- Due Date -->
+    <div class="field" [ngClass]="{ 'field-error': isFieldInvalid('dueDate') }">
+      <label class="label" for="dueDate">Due Date</label>
+      <input
+        id="dueDate"
+        class="input"
+        type="date"
+        formControlName="dueDate"
+      />
+      @if (hasError('dueDate', 'invalidDate')) {
+        <p class="error-msg">Please enter a valid date.</p>
+      }
+    </div>
+
+    <!-- Tags -->
+    <div class="field">
+      <label class="label" for="tags">Tags <span class="hint">(comma-separated)</span></label>
+      <input
+        id="tags"
+        class="input"
+        type="text"
+        formControlName="tags"
+        placeholder="bug, feature, ux"
+      />
+    </div>
+
+    <footer class="modal-footer">
+      <button type="button" class="btn-cancel" (click)="onCancel()">Cancel</button>
+      <button type="submit" class="btn-submit" [disabled]="form.invalid && submitted">
+        {{ isEdit ? 'Save Changes' : 'Create Task' }}
+      </button>
+    </footer>
+  </form>
+</div>

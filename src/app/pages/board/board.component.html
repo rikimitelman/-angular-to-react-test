@@ -1,0 +1,112 @@
+<div class="board-page">
+  <header class="board-header">
+    <div>
+      <h1 class="board-title">Kanban Board</h1>
+      <p class="board-sub">{{ totalTaskCount() }} tasks across {{ columnOrder.length }} columns</p>
+    </div>
+    <div class="board-actions">
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Search tasks…"
+        [value]="searchQuery()"
+        (input)="searchQuery.set($any($event.target).value)"
+      />
+      <select class="filter-select" [value]="filterPriority()" (change)="filterPriority.set($any($event.target).value)">
+        <option value="">All priorities</option>
+        <option value="critical">Critical</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+      <button class="btn-add" (click)="openAddTask()">+ Add Task</button>
+    </div>
+  </header>
+
+  <div class="board" cdkDropListGroup>
+    @for (status of columnOrder; track status) {
+      <div class="column" [ngClass]="columnClass(status)">
+        <div class="column-header">
+          <span class="column-title">{{ columnLabels[status] }}</span>
+          <span class="column-count">{{ tasksByStatus()[status].length }}</span>
+        </div>
+
+        <div
+          class="task-list"
+          cdkDropList
+          [cdkDropListData]="tasksByStatus()[status]"
+          [id]="status"
+          (cdkDropListDropped)="onDrop($event, status)"
+        >
+          @for (task of tasksByStatus()[status]; track task.id) {
+            <div
+              class="task-card"
+              cdkDrag
+              [cdkDragData]="task"
+              [ngClass]="{ 'task-overdue': isOverdue(task), 'task-done': task.status === 'done' }"
+            >
+              <!-- Drag handle -->
+              <div class="drag-handle" cdkDragHandle>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <circle cx="4" cy="3" r="1" fill="currentColor"/>
+                  <circle cx="8" cy="3" r="1" fill="currentColor"/>
+                  <circle cx="4" cy="6" r="1" fill="currentColor"/>
+                  <circle cx="8" cy="6" r="1" fill="currentColor"/>
+                  <circle cx="4" cy="9" r="1" fill="currentColor"/>
+                  <circle cx="8" cy="9" r="1" fill="currentColor"/>
+                </svg>
+              </div>
+
+              <div class="task-meta-top">
+                <span class="priority-badge" [ngClass]="priorityClass(task.priority)">{{ task.priority }}</span>
+                @if (getProject(task.projectId); as proj) {
+                  <span class="project-tag" [style.border-color]="proj.color" [style.color]="proj.color">
+                    {{ proj.name }}
+                  </span>
+                }
+              </div>
+
+              <a [routerLink]="['/tasks', task.id]" class="task-title">{{ task.title }}</a>
+
+              <div class="task-footer">
+                <span class="assignee-chip">{{ task.assignee.split(' ')[0] }}</span>
+                @if (task.dueDate) {
+                  <span class="due-date" [ngClass]="{ 'overdue': isOverdue(task) }">
+                    {{ task.dueDate | date:'MMM d' }}
+                  </span>
+                }
+                <div class="task-actions">
+                  <button class="icon-btn" title="Edit" (click)="openEditTask(task)">✎</button>
+                  <button class="icon-btn danger" title="Delete" (click)="deleteTask(task)">✕</button>
+                </div>
+              </div>
+
+              @if (task.tags.length > 0) {
+                <div class="task-tags">
+                  @for (tag of task.tags; track tag) {
+                    <span class="tag">{{ tag }}</span>
+                  }
+                </div>
+              }
+
+              <!-- CDK drag placeholder -->
+              <div *cdkDragPlaceholder class="drag-placeholder"></div>
+            </div>
+          }
+
+          @if (tasksByStatus()[status].length === 0) {
+            <div class="empty-column">Drop tasks here</div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+@if (showForm()) {
+  <app-task-form
+    [task]="editingTask()"
+    (saved)="closeForm()"
+    (cancelled)="closeForm()"
+  />
+}

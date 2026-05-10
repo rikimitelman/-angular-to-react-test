@@ -1,0 +1,158 @@
+<div class="tasks-page">
+  <header class="tasks-header">
+    <div>
+      <h1 class="tasks-title">All Tasks</h1>
+      <p class="tasks-sub">{{ sorted().length }} tasks found</p>
+    </div>
+  </header>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <input
+      class="search-input"
+      type="text"
+      placeholder="Search title or description…"
+      [value]="searchQuery()"
+      (input)="searchQuery.set($any($event.target).value); currentPage.set(1)"
+    />
+
+    <select class="filter-select" [value]="filterStatus()" (change)="filterStatus.set($any($event.target).value); currentPage.set(1)">
+      <option value="">All statuses</option>
+      <option value="todo">To Do</option>
+      <option value="in-progress">In Progress</option>
+      <option value="review">Review</option>
+      <option value="done">Done</option>
+    </select>
+
+    <select class="filter-select" [value]="filterPriority()" (change)="filterPriority.set($any($event.target).value); currentPage.set(1)">
+      <option value="">All priorities</option>
+      <option value="critical">Critical</option>
+      <option value="high">High</option>
+      <option value="medium">Medium</option>
+      <option value="low">Low</option>
+    </select>
+
+    <select class="filter-select" [value]="filterAssignee()" (change)="filterAssignee.set($any($event.target).value); currentPage.set(1)">
+      <option value="">All assignees</option>
+      @for (a of assignees; track a) {
+        <option [value]="a">{{ a }}</option>
+      }
+    </select>
+
+    @if (searchQuery() || filterStatus() || filterPriority() || filterAssignee()) {
+      <button class="btn-reset" (click)="resetFilters()">Clear filters</button>
+    }
+  </div>
+
+  <!-- Bulk actions -->
+  @if (selectedIds().size > 0) {
+    <div class="bulk-bar">
+      <span class="bulk-count">{{ selectedIds().size }} selected</span>
+      <button class="bulk-btn" (click)="bulkSetStatus('in-progress')">→ In Progress</button>
+      <button class="bulk-btn" (click)="bulkSetStatus('done')">✓ Mark Done</button>
+      <button class="bulk-btn danger" (click)="bulkDelete()">Delete</button>
+    </div>
+  }
+
+  <!-- Table -->
+  <div class="table-container">
+    <table class="tasks-table">
+      <thead>
+        <tr>
+          <th class="th-check">
+            <input type="checkbox" [checked]="allOnPageSelected()" (change)="toggleSelectAll()" />
+          </th>
+          <th class="th-sortable" (click)="sort('title')">
+            Title <span class="sort-icon">{{ sortIcon('title') }}</span>
+          </th>
+          <th class="th-sortable" (click)="sort('status')">
+            Status <span class="sort-icon">{{ sortIcon('status') }}</span>
+          </th>
+          <th class="th-sortable" (click)="sort('priority')">
+            Priority <span class="sort-icon">{{ sortIcon('priority') }}</span>
+          </th>
+          <th class="th-sortable" (click)="sort('assignee')">
+            Assignee <span class="sort-icon">{{ sortIcon('assignee') }}</span>
+          </th>
+          <th>Project</th>
+          <th class="th-sortable" (click)="sort('dueDate')">
+            Due Date <span class="sort-icon">{{ sortIcon('dueDate') }}</span>
+          </th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (task of paginated(); track task.id) {
+          <tr [ngClass]="{ 'row-selected': selectedIds().has(task.id), 'row-overdue': isOverdue(task) }">
+            <td class="td-check">
+              <input type="checkbox" [checked]="selectedIds().has(task.id)" (change)="toggleSelect(task.id)" />
+            </td>
+            <td class="td-title">
+              <a [routerLink]="['/tasks', task.id]" class="task-link">
+                <span [appHighlight]="searchQuery()">{{ task.title }}</span>
+              </a>
+              @if (task.tags.length > 0) {
+                <div class="row-tags">
+                  @for (tag of task.tags; track tag) {
+                    <span class="tag">{{ tag }}</span>
+                  }
+                </div>
+              }
+            </td>
+            <td>
+              <span class="status-badge" [ngClass]="statusClass(task.status)">
+                {{ task.status | titlecase }}
+              </span>
+            </td>
+            <td>
+              <span class="priority-badge" [ngClass]="priorityClass(task.priority)">
+                {{ task.priority | titlecase }}
+              </span>
+            </td>
+            <td class="td-assignee">{{ task.assignee }}</td>
+            <td>
+              @if (getProject(task.projectId); as proj) {
+                <span class="project-dot-label">
+                  <span class="pdot" [style.background]="proj.color"></span>
+                  {{ proj.name }}
+                </span>
+              }
+            </td>
+            <td [ngClass]="{ 'td-overdue': isOverdue(task) }">
+              {{ task.dueDate ? (task.dueDate | date:'MMM d, y') : '—' }}
+            </td>
+            <td class="td-actions">
+              <button class="icon-btn" title="Edit" (click)="openEdit(task)">✎</button>
+              <a [routerLink]="['/tasks', task.id]" class="icon-btn" title="View">→</a>
+            </td>
+          </tr>
+        }
+
+        @if (paginated().length === 0) {
+          <tr>
+            <td colspan="8" class="empty-row">No tasks match your filters.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  @if (totalPages() > 1) {
+    <div class="pagination">
+      <button class="page-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">‹</button>
+      @for (p of pageNumbers(); track p) {
+        <button class="page-btn" [ngClass]="{ 'page-active': p === currentPage() }" (click)="goToPage(p)">{{ p }}</button>
+      }
+      <button class="page-btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)">›</button>
+    </div>
+  }
+</div>
+
+@if (showForm()) {
+  <app-task-form
+    [task]="editingTask()"
+    (saved)="closeForm()"
+    (cancelled)="closeForm()"
+  />
+}

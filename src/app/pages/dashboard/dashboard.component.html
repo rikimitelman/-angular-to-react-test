@@ -1,0 +1,128 @@
+<div class="dashboard">
+  <header class="dash-header">
+    <div>
+      <h1 class="dash-title">Dashboard</h1>
+      <p class="dash-sub">Live project overview</p>
+    </div>
+    <a routerLink="/board" class="btn-primary">Open Board</a>
+  </header>
+
+  <!-- Stats Cards -->
+  <section class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Tasks</div>
+      <div class="stat-value">{{ stats().total }}</div>
+    </div>
+    <div class="stat-card indigo">
+      <div class="stat-label">In Progress</div>
+      <div class="stat-value">{{ stats().inProgress }}</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-label">In Review</div>
+      <div class="stat-value">{{ stats().review }}</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">Completed</div>
+      <div class="stat-value">{{ stats().done }}</div>
+      <div class="stat-sub">{{ stats().completionRate }}% rate</div>
+    </div>
+    <div class="stat-card" [class.red]="stats().overdue > 0">
+      <div class="stat-label">Overdue</div>
+      <div class="stat-value">{{ stats().overdue }}</div>
+    </div>
+  </section>
+
+  <div class="dash-main">
+    <!-- Left column -->
+    <div class="dash-left">
+
+      <!-- Donut Chart -->
+      <div class="card">
+        <h2 class="card-title">Status Breakdown</h2>
+        <div class="chart-wrapper">
+          <svg viewBox="0 0 120 120" class="donut-chart">
+            @for (seg of donutSegments(); track seg.label) {
+              <path [attr.d]="seg.path" [attr.fill]="seg.color" class="donut-seg">
+                <title>{{ seg.label }}: {{ seg.value }}</title>
+              </path>
+            }
+            <text x="60" y="56" text-anchor="middle" class="donut-center-top">{{ stats().completionRate }}%</text>
+            <text x="60" y="68" text-anchor="middle" class="donut-center-bot">done</text>
+          </svg>
+          <div class="donut-legend">
+            @for (seg of donutSegments(); track seg.label) {
+              <div class="legend-item">
+                <span class="legend-dot" [style.background]="seg.color"></span>
+                <span class="legend-label">{{ seg.label }}</span>
+                <span class="legend-val">{{ seg.value }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Bar Chart -->
+      <div class="card">
+        <h2 class="card-title">Tasks by Status</h2>
+        <div class="bar-chart">
+          @for (bar of barData(); track bar.label) {
+            <div class="bar-row">
+              <span class="bar-label">{{ bar.label }}</span>
+              <div class="bar-track">
+                <div class="bar-fill" [style.width.%]="bar.pct" [style.background]="bar.color"></div>
+              </div>
+              <span class="bar-val">{{ bar.value }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Projects -->
+      <div class="card">
+        <h2 class="card-title">Projects</h2>
+        <div class="project-list">
+          @for (p of projectTaskCounts(); track p.id) {
+            <div class="project-row">
+              <span class="project-dot" [style.background]="p.color"></span>
+              <span class="project-name">{{ p.name }}</span>
+              <div class="project-progress-track">
+                <div
+                  class="project-progress-fill"
+                  [style.width.%]="p.count ? (p.done / p.count) * 100 : 0"
+                  [style.background]="p.color"
+                ></div>
+              </div>
+              <span class="project-count">{{ p.done }}/{{ p.count }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: Live Feed -->
+    <div class="dash-right">
+      <div class="card feed-card">
+        <div class="feed-header">
+          <h2 class="card-title">Live Activity</h2>
+          <span class="live-badge">
+            <span class="live-dot"></span>
+            live
+          </span>
+        </div>
+
+        <ul class="activity-list">
+          @for (event of activityFeed(); track event.id) {
+            <li class="activity-item" [ngClass]="eventClass(event.type)">
+              <span class="ev-icon" [ngClass]="eventClass(event.type)">{{ eventIcon(event.type) }}</span>
+              <div class="ev-body">
+                <span class="ev-actor">{{ event.actor }}</span>
+                <span class="ev-detail">{{ event.detail }}</span>
+              </div>
+              <span class="ev-time">{{ event.timestamp | timeAgo }}</span>
+            </li>
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

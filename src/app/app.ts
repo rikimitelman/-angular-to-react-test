@@ -1,12 +1,25 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { NavbarComponent } from './components/navbar/navbar.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  imports: [RouterOutlet, NavbarComponent],
+  template: `
+    <app-navbar />
+    <main class="app-main">
+      <router-outlet />
+    </main>
+  `,
+  styles: [`
+    :host {
+      display: block;
+      min-height: 100dvh;
+      background: #0f172a;
+    }
+    .app-main {
+      overflow-y: auto;
+    }
+  `],
 })
-export class App {
-  protected readonly title = signal('angular-to-react-test');
-}
+export class App {}

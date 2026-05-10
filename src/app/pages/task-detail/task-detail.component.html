@@ -1,0 +1,101 @@
+<div class="detail-page">
+
+  @if (notFound()) {
+    <div class="not-found">
+      <p>Task not found.</p>
+      <a routerLink="/tasks" class="back-link">← Back to Tasks</a>
+    </div>
+  }
+
+  @if (task(); as t) {
+    <div class="detail-header">
+      <a routerLink="/tasks" class="back-link">← All Tasks</a>
+      <div class="detail-actions">
+        <button class="btn-edit" (click)="showEditForm.set(true)">Edit</button>
+        <button class="btn-delete" (click)="deleteTask()">Delete</button>
+      </div>
+    </div>
+
+    <div class="detail-body">
+      <!-- Main content -->
+      <div class="detail-main">
+        <div class="meta-row">
+          <span class="priority-badge" [ngClass]="priorityClass(t.priority)">{{ t.priority | titlecase }}</span>
+          <span class="status-badge" [ngClass]="statusClass(t.status)">{{ columnLabels[t.status] }}</span>
+          @if (isOverdue()) {
+            <span class="overdue-chip">Overdue</span>
+          }
+        </div>
+
+        <h1 class="detail-title">{{ t.title }}</h1>
+
+        <p class="detail-description">{{ t.description }}</p>
+
+        @if (t.tags.length > 0) {
+          <div class="tags-section">
+            <span class="section-label">Tags</span>
+            <div class="tags-row">
+              @for (tag of t.tags; track tag) {
+                <span class="tag">{{ tag }}</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="detail-sidebar">
+        <div class="sidebar-card">
+          <div class="sidebar-row">
+            <span class="sidebar-label">Assignee</span>
+            <span class="sidebar-val">{{ t.assignee }}</span>
+          </div>
+
+          <div class="sidebar-row">
+            <span class="sidebar-label">Project</span>
+            @if (project(); as proj) {
+              <span class="sidebar-val project-val">
+                <span class="pdot" [style.background]="proj.color"></span>
+                {{ proj.name }}
+              </span>
+            }
+          </div>
+
+          <div class="sidebar-row">
+            <span class="sidebar-label">Due Date</span>
+            <span class="sidebar-val" [ngClass]="{ 'overdue-text': isOverdue() }">
+              {{ t.dueDate ? (t.dueDate | date:'MMMM d, y') : 'No due date' }}
+            </span>
+          </div>
+
+          <div class="sidebar-row">
+            <span class="sidebar-label">Created</span>
+            <span class="sidebar-val" title="{{ t.createdAt | date:'medium' }}">
+              {{ t.createdAt | timeAgo }}
+            </span>
+          </div>
+
+          <div class="sidebar-row">
+            <span class="sidebar-label">Updated</span>
+            <span class="sidebar-val" title="{{ t.updatedAt | date:'medium' }}">
+              {{ t.updatedAt | timeAgo }}
+            </span>
+          </div>
+
+          <div class="sidebar-row">
+            <span class="sidebar-label">Task ID</span>
+            <span class="sidebar-val id-val">{{ t.id }}</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+  }
+</div>
+
+@if (showEditForm() && task()) {
+  <app-task-form
+    [task]="task()"
+    (saved)="afterSave()"
+    (cancelled)="showEditForm.set(false)"
+  />
+}
