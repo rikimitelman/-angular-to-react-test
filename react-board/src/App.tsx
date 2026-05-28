@@ -1,5 +1,5 @@
 import './App.css'
-import { Board } from './components/BoardComponent/Board'
+import { Board } from './components/BoardComponent/Board.component'
 import { Routes, Route } from "react-router-dom";
 export const App = () => {
 
