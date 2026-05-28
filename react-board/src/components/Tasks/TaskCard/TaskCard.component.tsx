@@ -97,7 +97,10 @@ export const TaskCard = ({
                     ))}
                 </Stack>
 
-                <Stack direction="row" spacing={1}>
+                <Stack className="task-actions"
+                    direction="row"
+                    spacing={1}
+                    sx={styles.actions}>
                     <Button size="small" variant="outlined" onClick={() => onEdit(task)}>
                         Edit
                     </Button>

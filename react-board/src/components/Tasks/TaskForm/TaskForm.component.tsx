@@ -11,7 +11,7 @@ import {
   type TaskStatus,
 } from "../../../types/task.types";
 import { useTasks } from "../../../hooks/useTasks";
-import { isValidTitle, parseTags, toInputDate } from "../../../utils/task.utils";
+import { isValidDescription, isValidTitle, parseTags, toInputDate } from "../../../utils/task.utils";
 import { taskFormStyles } from "./TaskForm.styles";
 
 type Props = {
@@ -58,11 +58,17 @@ export const TaskForm = ({ task, onSaved, onCancel }: Props) => {
   };
 
   const titleError = submitted && !isValidTitle(form.title);
+  const descriptionError =
+    submitted && !isValidDescription(form.description);
 
   const handleSubmit = () => {
     setSubmitted(true);
-    if (!isValidTitle(form.title)) return;
-
+    if (
+      !isValidTitle(form.title) ||
+      !isValidDescription(form.description)
+    ) {
+      return;
+    }
     const payload = {
       title: form.title.trim(),
       description: form.description.trim(),
@@ -98,6 +104,12 @@ export const TaskForm = ({ task, onSaved, onCancel }: Props) => {
           multiline
           minRows={3}
           fullWidth
+          error={descriptionError}
+          helperText={
+            descriptionError
+              ? "Description must be under 500 characters"
+              : ""
+          }
         />
 
         <Stack direction="row" spacing={2}>

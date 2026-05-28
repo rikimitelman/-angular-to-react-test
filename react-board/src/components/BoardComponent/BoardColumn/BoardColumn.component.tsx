@@ -28,13 +28,7 @@ export const BoardColumn = ({
     onDragStart,
 }: Props) => {
     const styles = boardColumnStyles(borderColor);
-    {
-        tasks.length === 0 && (
-            <Typography sx={{ color: "#64748b", fontSize: 14 }}>
-                No tasks
-            </Typography>
-        )
-    }
+
     return (
         <Paper
             onDragOver={(e) => e.preventDefault()}
@@ -64,7 +58,11 @@ export const BoardColumn = ({
                     sx={styles.countChip}
                 />
             </Stack>
-
+            {tasks.length === 0 && (
+                <Typography sx={{ color: "#64748b", fontSize: 14 }}>
+                    No tasks
+                </Typography>
+            )}
             {tasks.map((task) => (
                 <TaskCard
                     key={task.id}

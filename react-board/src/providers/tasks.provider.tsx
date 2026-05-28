@@ -1,6 +1,5 @@
 import {
     useEffect,
-    useMemo,
     useState,
     type ReactNode,
 } from 'react';
@@ -14,42 +13,10 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     const [tasks, setTasks] = useState<Task[]>(() => loadFromStorage());
 
 
-    const stats = useMemo(() => {
-        const now = new Date();
-        const total = tasks.length;
-        const done = tasks.filter(t => t.status === 'done').length;
-        return {
-            total,
-            todo: tasks.filter(t => t.status === 'todo').length,
-            inProgress: tasks.filter(t => t.status === 'in-progress').length,
-            review: tasks.filter(t => t.status === 'review').length,
-            done,
-            overdue: tasks.filter(t => t.dueDate && new Date(t.dueDate) < now && t.status !== 'done').length,
-            completionRate: total ? Math.round((done / total) * 100) : 0,
-        };
-    }, [tasks]);
-
-    const tasksByStatus = useMemo(() => {
-        const map: Record<TaskStatus, Task[]> = {
-            'todo': [],
-            'in-progress': [],
-            'review': [],
-            'done': [],
-        };
-        for (const task of tasks) {
-            map[task.status].push(task);
-        }
-        return map;
-    }, [tasks]);
-
     useEffect(() => {
         saveToStorage(tasks);
     }, [tasks]);
 
-    // todo: change to const syntax
-    const getById = (id: string): Task | undefined => {
-        return tasks.find(t => t.id === id);
-    }
 
     const addTask = (partial: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>): Task => {
         const now = new Date();
@@ -79,28 +46,14 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         setTasks(tasks => tasks.filter(t => t.id !== id));
     }
 
-    const reorderInColumn = (status: TaskStatus, previousIndex: number, currentIndex: number) => {
-        setTasks(tasks => {
-            const columnTasks = tasks.filter(t => t.status === status);
-            const otherTasks = tasks.filter(t => t.status !== status);
-            const [moved] = columnTasks.splice(previousIndex, 1);
-            columnTasks.splice(currentIndex, 0, moved);
-            return [...otherTasks, ...columnTasks];
-        });
-    }
-
     return (
         <TasksContext.Provider
             value={{
                 tasks,
-                stats,
-                tasksByStatus,
                 addTask,
                 deleteTask,
-                getById,
                 updateTask,
                 moveTask,
-                reorderInColumn,
             }}
         >
             {children}

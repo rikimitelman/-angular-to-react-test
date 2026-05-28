@@ -70,3 +70,7 @@ export const isValidTitle = (title: string) => {
   const length = title.trim().length;
   return length >= 3 && length <= 120;
 };
+
+export const isValidDescription = (description: string) => {
+  return description.trim().length <= 500;
+};

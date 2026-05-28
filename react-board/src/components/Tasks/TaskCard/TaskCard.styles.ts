@@ -2,21 +2,34 @@
 export const getTaskCardStyles
  = (isDone: boolean) => ({
     root: {
-        cursor: "grab",
-        "&:active": {
-            cursor: "grabbing",
-        },
-        bgcolor: "#1e293b",
-        border: "1px solid #334155",
-        opacity: isDone ? 0.6 : 1,
-        mb: 1.5,
-        borderRadius: 2,
-        transition: "0.2s",
-        "&:hover": {
-            borderColor: "#64748b",
-            transform: "translateY(-2px)",
-        },
+    cursor: "grab",
+    bgcolor: "#1e293b",
+    border: "1px solid #334155",
+    opacity: isDone ? 0.6 : 1,
+    mb: 1.5,
+    borderRadius: 2,
+    transition: "0.2s",
+
+    "&:active": {
+      cursor: "grabbing",
     },
+
+    "&:hover": {
+      borderColor: "#64748b",
+      transform: "translateY(-2px)",
+    },
+
+    "&:hover .task-actions": {
+      opacity: 1,
+      visibility: "visible",
+    },
+  },
+
+  actions: {
+    opacity: 0,
+    visibility: "hidden",
+    transition: "0.2s",
+  },
 
     content: {
         p: 2,
