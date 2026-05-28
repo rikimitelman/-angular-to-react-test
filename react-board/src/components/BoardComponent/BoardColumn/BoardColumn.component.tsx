@@ -1,6 +1,7 @@
 import { Chip, Paper, Stack, Typography } from "@mui/material";
-import type { Task, TaskStatus } from "../../types/task.types";
-import { TaskCard } from "./TaskCard.component";
+import type { Task, TaskStatus } from "../../../types/task.types";
+import { boardColumnStyles } from "./BoardColumn.styles";
+import { TaskCard } from "../../Tasks/TaskCard/TaskCard.component";
 
 type Props = {
     status: TaskStatus;
@@ -14,7 +15,6 @@ type Props = {
     onDeleteTask: (id: string) => void;
     onDragStart: (id: string) => void;
 };
-
 export const BoardColumn = ({
     status,
     label,
@@ -27,6 +27,14 @@ export const BoardColumn = ({
     onDeleteTask,
     onDragStart,
 }: Props) => {
+    const styles = boardColumnStyles(borderColor);
+    {
+        tasks.length === 0 && (
+            <Typography sx={{ color: "#64748b", fontSize: 14 }}>
+                No tasks
+            </Typography>
+        )
+    }
     return (
         <Paper
             onDragOver={(e) => e.preventDefault()}
@@ -36,26 +44,16 @@ export const BoardColumn = ({
                 onDropTask(draggedTaskId, status);
                 onClearDraggedTask();
             }}
-            sx={{
-                bgcolor: "#111827",
-                border: "1px solid #243044",
-                p: 2,
-                borderRadius: 2,
-                borderTop: `3px solid ${borderColor}`,
-            }}
+            sx={styles.root}
         >
             <Stack
                 direction="row"
                 justifyContent="space-between"
                 alignItems="center"
-                sx={{ mb: 2 }}
+                sx={styles.header}
             >
                 <Typography
-                    sx={{
-                        color: "#bfdbfe",
-                        fontWeight: 700,
-                        textTransform: "uppercase",
-                    }}
+                    sx={styles.title}
                 >
                     {label}
                 </Typography>
@@ -63,10 +61,7 @@ export const BoardColumn = ({
                 <Chip
                     label={tasks.length}
                     size="small"
-                    sx={{
-                        bgcolor: "#1e293b",
-                        color: "white",
-                    }}
+                    sx={styles.countChip}
                 />
             </Stack>
 

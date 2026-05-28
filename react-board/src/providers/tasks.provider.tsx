@@ -90,15 +90,19 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     }
 
     return (
-        <TasksContext.Provider value={{
-            tasks,
-            addTask,
-            deleteTask,
-            getById,
-            updateTask,
-            moveTask,
-            reorderInColumn,
-        }}>
+        <TasksContext.Provider
+            value={{
+                tasks,
+                stats,
+                tasksByStatus,
+                addTask,
+                deleteTask,
+                getById,
+                updateTask,
+                moveTask,
+                reorderInColumn,
+            }}
+        >
             {children}
         </TasksContext.Provider>
     )

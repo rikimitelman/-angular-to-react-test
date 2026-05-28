@@ -64,3 +64,10 @@ export const COLUMN_LABELS: Record<TaskStatus, string> = {
   'review': 'Review',
   'done': 'Done',
 };
+
+export const PRIORITIES: TaskPriority[] = [
+  "low",
+  "medium",
+  "high",
+  "critical",
+];

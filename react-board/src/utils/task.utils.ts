@@ -1,4 +1,4 @@
-import type { Task, TaskStatus } from "../types/task.types";
+import { PROJECTS, type Task, type TaskStatus } from "../types/task.types";
 
 export const groupTasksByStatus = (tasks: Task[]) => {
     const map: Record<TaskStatus, Task[]> = {
@@ -49,4 +49,24 @@ export const isTaskOverdue = (task: Task) => {
         new Date(task.dueDate) < new Date() &&
         task.status !== "done"
     );
+};
+
+export const getProject = (projectId: string) => {
+    return PROJECTS.find((project) => project.id === projectId);
+};
+
+export const toInputDate = (date: Date | null | undefined) => {
+  if (!date) return "";
+  return new Date(date).toISOString().split("T")[0];
+};
+
+export const parseTags = (tags: string) =>
+  tags
+    .split(",")
+    .map(tag => tag.trim())
+    .filter(Boolean);
+
+export const isValidTitle = (title: string) => {
+  const length = title.trim().length;
+  return length >= 3 && length <= 120;
 };
